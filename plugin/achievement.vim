@@ -233,7 +233,21 @@ function! s:update(event)
   for x in s:achievements
     if a:event =~ x.event && !has_key(s:unlocked, x.key) && eval(x.cond)
       let s:unlocked[x.key] = 1
-      echomsg printf('ACHIEVEMENT UNLOCKED: %s', x.msg)
+      call s:notify(printf('ACHIEVEMENT UNLOCKED: %s', x.msg))
     endif
   endfor
 endfunction
+
+function! s:notify_echomsg(msg)
+  echomsg a:msg
+endfunction
+
+function! s:notify_notify_send(msg)
+  call system('notify-send ' . shellescape(a:msg))
+endfunction
+
+if $DISPLAY != '' && executable('notify-send')
+  let s:notify = function('s:notify_notify_send')
+else
+  let s:notify = function('s:notify_echomsg')
+endif
